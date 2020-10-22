@@ -214,7 +214,6 @@ function Get-HuduCardLookup {
 }
 
 function Post-HuduCompany {
-
         param(
         $Token,
         $URL,
@@ -230,29 +229,50 @@ function Post-HuduCompany {
         $zip,
         $website,
         $notes
- )
+    )
 
 
     $RequestParams = @{ 
-        company = @{
-
-        }
+        company = @{}
     }
     if ($company_name) {
         $RequestParams.company.add('name',$company_name)
     }
-            #name = $company_name;
-            #nickname = $company_nickname;
-            #address_line_1 = $address_line_1;
-            #address_line_2 = $address_line_1;
-            #city = $city;
-            #state = $state;
-            #zip = $zip;
-            #country_name = $country_name;
-            #phone_number = $phone_number;
-            #fax_number = $fax_number;
-            #website = $website;
-            #notes = $notes
+    if ($company_nickname) {
+        $RequestParams.company.add('nickname',$company_nickname)
+    }
+    if ($address_line_1) {
+        $RequestParams.company.add('address_line_1',$address_line_1)
+    }
+    if ($address_line_2) {
+        $RequestParams.company.add('address_line_2',$address_line_2)
+    }
+    if ($city) {
+        $RequestParams.company.add('city',$city)
+    }
+    if ($state) {
+        $RequestParams.company.add('state',$state)
+    }
+    if ($zip) {
+        $RequestParams.company.add('zip',$zip)
+    }
+    if ($country_name) {
+        $RequestParams.company.add('country_name',$country_name)
+    }
+    
+    if ($phone_number) {
+        $RequestParams.company.add('phone_number',$phone_number)
+    }
+    
+    if ($fax_number) {
+        $RequestParams.company.add('fax_number',$fax_number)
+    }
+    if ($website) {
+        $RequestParams.company.add('website',$website)
+    }
+    if ($notes) {
+        $RequestParams.company.add('notes',$notes)
+    }
 
     #remove empty keys
     $RequestParams.GetEnumerator() | ? Value
