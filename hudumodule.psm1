@@ -288,6 +288,25 @@ function Post-HuduCompany {
     return hudu_request -Token "$Token" -URL "$URL" -Method "POST" -Body $(ConvertTo-Json $RequestParams)
     
 }
+
+function Delete-HuduCompany {
+        param(
+        $Token,
+        $URL,
+        $company_id
+    )
+
+    $EndPoint = "api/v1/companies/$company_id"
+
+    $URL += $EndPoint
+
+    $json = hudu_request -Token "$Token" -URL "$URL" -Method "DELETE"
+
+    $jsonObject = ConvertFrom-Json $json
+
+    return $jsonObject
+
+}
 Export-ModuleMember -Function Get-HuduCompanies
 Export-ModuleMember -Function Get-HuduAssets
 Export-ModuleMember -Function Get-HuduCardLookup
