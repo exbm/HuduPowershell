@@ -311,4 +311,4 @@ Export-ModuleMember -Function Get-HuduCompanies
 Export-ModuleMember -Function Get-HuduAssets
 Export-ModuleMember -Function Get-HuduCardLookup
 Export-ModuleMember -Function Post-HuduCompany
-Ex[prt-ModuleMember -Function Delete-HuduCompany
+Export-ModuleMember -Function Delete-HuduCompany
