@@ -213,6 +213,43 @@ function Get-HuduCardLookup {
 
 }
 
+function Create-HuduAsset {
+        param(
+        $Token,
+        $URL,
+        $asset_name,
+        $asset_fields,
+        $company_id
+    )
+
+    $RequestParams = @{ 
+        asset = @{fields=@[]}
+    }
+    if ($asset_name) {
+        $RequestParams.asset.add('name',$asset_name)
+    }
+    
+    if ($asset_fields -is [Array]) {
+      foreach ($asset_fields as $field) {
+        if ($field['asset_layout_field_id'] AND $field['value']) {
+          $RequestParams.asset.fields.add(@{asset_layout_field_id=$field['asset_layout_field_id']; value=$field['value']})
+        }
+      }
+    }
+
+    #remove empty keys
+    $RequestParams.GetEnumerator() | ? Value
+
+
+    $EndPoint = "/api/v1/companies/$company_id/assets"
+
+
+    $URL += $EndPoint
+    
+    return hudu_request -Token "$Token" -URL "$URL" -Method "POST" -Body $(ConvertTo-Json $RequestParams)
+    
+}
+
 function Post-HuduCompany {
         param(
         $Token,
