@@ -170,6 +170,36 @@ function Get-HuduAssets {
     return $jsonObject.assets
 
 }
+function Get-AssetLookup {
+        param(
+        $Token,
+        $URL,
+        $primary_serial,
+    )
+
+    $EndPoint = "api/v1/asset_lookup"
+
+    Add-Type -AssemblyName System.Web
+
+    $ParamCollection = [System.Web.HttpUtility]::ParseQueryString([String]::Empty) 
+
+    if ($primary_serial) {
+        $ParamCollection.Add('primary_serial',$primary_serial)
+    }
+
+    Write-Warning $ParamCollection
+
+    $URL = $URL + $EndPoint + "?" + $ParamCollection.ToString()
+
+    write-warning $URL
+
+    $json = hudu_request -Token "$Token" -URL "$URL" -Method "GET"
+
+    $jsonObject = ConvertFrom-Json $json
+
+    return $jsonObject.assets
+
+}
 function Get-HuduCardLookup {
         param(
         $Token,
