@@ -1,13 +1,11 @@
 <#
  .Synopsis
   Hudu Powershell Module
-
  .Description
   Hudu Powershell Module
  .Parameter token
   hudu Api Token for Authentication
  .Example
-
 #>
 function hudu_request {
     param(
@@ -127,11 +125,83 @@ function Get-HuduCompanies {
     return $jsonObject.companies
 
 }
-function Get-AssetLookup {
+function Get-HuduPasswords {
         param(
         $Token,
         $URL,
-        $primary_serial,
+        $page,
+        $page_size
+    )
+
+
+    $EndPoint = "api/v1/asset_passwords"
+
+    Add-Type -AssemblyName System.Web
+
+    $ParamCollection = [System.Web.HttpUtility]::ParseQueryString([String]::Empty) 
+
+    if ($page) {
+        $ParamCollection.Add('page',$page)
+    }
+        if ($page_size) {
+        $ParamCollection.Add('page_size',$page_size)
+    }
+    
+    Write-Warning $ParamCollection
+
+    $URL = $URL + $EndPoint + "?" + $ParamCollection.ToString()
+
+    write-warning $URL
+
+    $json = hudu_request -Token "$Token" -URL "$URL" -Method "GET"
+
+    $jsonObject = ConvertFrom-Json $json
+
+    return $jsonObject
+
+}
+function Get-HuduPassword {
+        param(
+        $Token,
+        $URL,
+        $id,
+        $page,
+        $page_size
+    )
+
+
+    $EndPoint = "api/v1/asset_passwords/$id"
+
+    Add-Type -AssemblyName System.Web
+
+    $ParamCollection = [System.Web.HttpUtility]::ParseQueryString([String]::Empty) 
+
+    if ($page) {
+        $ParamCollection.Add('page',$page)
+    }
+        if ($page_size) {
+        $ParamCollection.Add('page_size',$page_size)
+    }
+    
+    Write-Warning $ParamCollection
+
+    $URL = $URL + $EndPoint + "?" + $ParamCollection.ToString()
+
+    write-warning $URL
+
+    $json = hudu_request -Token "$Token" -URL "$URL" -Method "GET"
+
+    $jsonObject = ConvertFrom-Json $json
+
+    return $jsonObject.assets
+
+}
+
+function Find-HuduAssetbySerial {
+        param(
+        $Token,
+        $URL,
+        $primary_serial
     )
 
     $EndPoint = "api/v1/asset_lookup"
@@ -154,7 +224,7 @@ function Get-AssetLookup {
 
     $jsonObject = ConvertFrom-Json $json
 
-    return $jsonObject.assets
+    return $jsonObject
 
 }
     
@@ -229,9 +299,6 @@ function Get-HuduCardLookup {
         $ParamCollection.Add('integration_identifier',$integration_identifier)
     }
 
-
-    Write-Warning $ParamCollection
-
     $URL = $URL + $EndPoint + "?" + $ParamCollection.ToString()
 
     write-warning $URL
@@ -244,7 +311,7 @@ function Get-HuduCardLookup {
 
 }
 
-function Create-HuduAsset {
+function New-HuduAsset {
         param(
         $Token,
         $URL,
@@ -254,15 +321,15 @@ function Create-HuduAsset {
     )
 
     $RequestParams = @{ 
-        asset = @{fields=@[]}
+        asset = @{fields= @() }
     }
     if ($asset_name) {
         $RequestParams.asset.add('name',$asset_name)
     }
     
     if ($asset_fields -is [Array]) {
-      foreach ($asset_fields as $field) {
-        if ($field['asset_layout_field_id'] AND $field['value']) {
+      foreach ($field in $asset_fields) {
+        if (($field['asset_layout_field_id']) -and ($field['value'])) {
           $RequestParams.asset.fields.add(@{asset_layout_field_id=$field['asset_layout_field_id']; value=$field['value']})
         }
       }
@@ -281,7 +348,7 @@ function Create-HuduAsset {
     
 }
 
-function Post-HuduCompany {
+function New-HuduCompany {
         param(
         $Token,
         $URL,
@@ -357,6 +424,123 @@ function Post-HuduCompany {
     
 }
 
+function New-HuduPassword {
+        param(
+        $Token,
+        $URL,
+        $company_id,
+        $passwordable_type,
+        $passwordable_id,
+        $name,
+        $username,
+        $in_portal,
+        $password,
+        $otp_secret
+    )
+
+
+    $RequestParams = @{ 
+        asset_password = @{}
+    }
+    if ($company_id) {
+        $RequestParams.asset_password.add('company_id',$company_id)
+    }
+    if ($passwordable_type) {
+        $RequestParams.asset_password.add('passwordable_type',$passwordable_type)
+    }
+    if ($passwordable_id) {
+        $RequestParams.asset_password.add('passwordable_id',$passwordable_id)
+    }
+    if ($name) {
+        $RequestParams.asset_password.add('name',$name)
+    }
+    if ($in_portal) {
+        $RequestParams.asset_password.add('in_portal',$in_portal)
+    }
+    if ($password) {
+        $RequestParams.asset_password.add('password',$password)
+    }
+    if ($otp_secret) {
+        $RequestParams.asset_password.add('otp_secret',$otp_secret)
+    }
+    if ($username) {
+        $RequestParams.asset_password.add('username',$usernames)
+    }
+
+    #remove empty keys
+    $RequestParams.GetEnumerator() | ? Value
+
+
+    $EndPoint = "api/v1/asset_passwords"
+
+
+    $URL += $EndPoint
+
+    Write-Warning $URL
+
+    return hudu_request -Token "$Token" -URL "$URL" -Method "POST" -Body $(ConvertTo-Json $RequestParams)
+    
+}
+
+function Set-HuduPassword {
+        param(
+        $Token,
+        $URL,
+        $id,
+        $company_id,
+        $passwordable_type,
+        $passwordable_id,
+        $name,
+        $username,
+        $in_portal,
+        $password,
+        $otp_secret
+    )
+
+
+    $RequestParams = @{ 
+        asset_password = @{}
+    }
+    if ($company_id) {
+        $RequestParams.asset_password.add('company_id',$company_id)
+    }
+    if ($passwordable_type) {
+        $RequestParams.asset_password.add('passwordable_type',$passwordable_type)
+    }
+    if ($passwordable_id) {
+        $RequestParams.asset_password.add('passwordable_id',$passwordable_id)
+    }
+    if ($name) {
+        $RequestParams.asset_password.add('name',$name)
+    }
+    if ($in_portal) {
+        $RequestParams.asset_password.add('in_portal',$in_portal)
+    }
+    if ($password) {
+        $RequestParams.asset_password.add('password',$password)
+    }
+    if ($otp_secret) {
+        $RequestParams.asset_password.add('otp_secret',$otp_secret)
+    }
+    if ($username) {
+        $RequestParams.asset_password.add('username',$username)
+    }
+
+    #remove empty keys
+    $RequestParams.GetEnumerator() | ? Value
+
+
+    $EndPoint = "api/v1/asset_passwords/$id"
+
+
+    $URL += $EndPoint
+
+    Write-Warning $URL
+
+    return hudu_request -Token "$Token" -URL "$URL" -Method "PUT" -Body $(ConvertTo-Json $RequestParams)
+    
+}
+
 function Delete-HuduCompany {
         param(
         $Token,
@@ -377,6 +561,11 @@ function Delete-HuduCompany {
 }
 Export-ModuleMember -Function Get-HuduCompanies
 Export-ModuleMember -Function Get-HuduAssets
+Export-ModuleMember -Function Find-HuduAssetbySerial
+Export-ModuleMember -Function Get-HuduPassword
+Export-ModuleMember -Function Get-HuduPasswords
+Export-ModuleMember -Function Set-HuduPassword
+Export-ModuleMember -Function New-HuduPassword
 Export-ModuleMember -Function Get-HuduCardLookup
-Export-ModuleMember -Function Post-HuduCompany
+Export-ModuleMember -Function New-HuduCompany
 Export-ModuleMember -Function Delete-HuduCompany
